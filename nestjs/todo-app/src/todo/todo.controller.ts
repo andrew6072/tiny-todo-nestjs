@@ -23,6 +23,9 @@ export class TodoController {
 
     // Create a todo
     @Post('/')
+    // 1) create middleware for multiple used components like @Res()
+    // 2) instead of getTodo() use get()
+    // 
     async create(@Res() res, @Body() createTodoDTO: CreateTodoDTO) {
         const newTodo = await this.todoService.addTodo(createTodoDTO);
         if (!newTodo) {
@@ -31,6 +34,7 @@ export class TodoController {
         return res.status(HttpStatus.OK).json({
             message: 'Todo has been submitted successfully!',
             todo: newTodo,
+            // use `data` instead of `todo` because we are in todo module, no need to specifically name todo.
         });
     }
 
