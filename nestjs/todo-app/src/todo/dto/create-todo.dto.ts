@@ -1,7 +1,6 @@
 export class CreateTodoDTO {
-  readonly id: number;
+  readonly userId: number;
   readonly title: string;
   readonly description: string;
-  readonly isDone: boolean;
+  readonly status: 'pending' | 'in-progress' | 'completed';
 }
-  

@@ -1,94 +1,72 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, Res } from '@nestjs/common';
 import { CreateTodoDTO } from './dto/create-todo.dto';
-
-// Creates a Todo interface to show exactly the attribute of our Todo
-interface Todo {
-    readonly id: number;
-    readonly title: string;
-    readonly description: string;
-    readonly isDone: boolean;
-  }
+import { InjectRepository } from '@nestjs/typeorm';
+import { Like, Repository } from 'typeorm';
+import { Todo } from './todo.entity';
+import { UpdateTodoDTO } from './dto/update-todo.dto';
 
 @Injectable()
 export class TodoService {
-    // Creates a Todo array with one Todo
-    private todos: Todo[] = [
-        {
-            id: 1,
-            title: 'Test',
-            description: 'This is a test Tod',
-            isDone: true,
-        },
-        {
-            id: 3,
-            title: "XXX",
-            description: "YYY",
-            isDone: true
-        },
-        {
-            id: 4,
-            title: "XXX",
-            description: "YYY",
-            isDone: true
-        },
-        {
-            id: 5,
-            title: "XXX",
-            description: "YYY",
-            isDone: true
-        },
-        {
-            id: 88,
-            title: "X",
-            description: "Y",
-            isDone: true
+
+    constructor(
+        @InjectRepository(Todo)
+        private readonly todoRepository: Repository<Todo>,
+    ) {}
+    
+    async findAll(): Promise<Todo[]> {
+        const data = await this.todoRepository.find();
+        return data;
+    }
+
+    async findOne(id: number): Promise<Todo> {
+        const data = await this.todoRepository.findOne({ 
+            where: { id }
+        });
+        if (!data) {
+            throw new NotFoundException('Data not found');
         }
-    ];
-
-    async existedTodo(todoID: number): Promise<boolean> {
-        return this.todos.some(todo => todo.id === todoID)
+        return data;
     }
 
-    // Creates a new todo (Add todo to array)
-    async addTodo(createTodoDTO: CreateTodoDTO): Promise<Todo> {
-        if (await this.existedTodo(createTodoDTO.id)){
-            return null;
+    async create(createTodoDto: CreateTodoDTO): Promise<Todo> {
+        // ? Do we need to check if userId is present in DB O(n) ?
+        // Or we can hanle this issue by only let existed user to create Todo
+        const newTodo = this.todoRepository.create({
+            title: createTodoDto.title,
+            description: createTodoDto.description,
+            userId: createTodoDto.userId,  // Assuming you pass the userId from the request
+        });
+        return await this.todoRepository.save(newTodo);
+    }
+
+    async update(id: number, updateTodoDto: UpdateTodoDTO): Promise<Todo> {
+        const statusSet = ['pending', 'in-progress', 'completed'];
+        const todo = await this.findOne(id);
+
+        if (!todo) {
+            throw new NotFoundException('Todo not found');
         }
-        this.todos.push(createTodoDTO);
-        return this.todos.at(-1);
-    }
-
-    // Returns a single todo with ID
-    async getTodo(todoID: number): Promise<Todo> {
-        const todo = this.todos.find((todo) => todo.id === todoID);
-        return todo;
-    }
-
-    // Returns all todos available
-    async getTodos(): Promise<Todo[]> {
-        return this.todos;
-    }
-
-    // Deletes a todo by ID and add a new one (Update process)
-    async editTodo(postID: number, createTodoDTO: CreateTodoDTO): Promise<Todo> {
-        if (! await this.existedTodo(postID)) {
-            return null;
+        if (!statusSet.includes(updateTodoDto.status)) {
+            throw new ConflictException('Status not supported');
         }
-        if (await this.existedTodo(createTodoDTO.id)) {
-            throw new ConflictException("This new ID already exists.")
-        }
-        await this.deleteTodo(postID);
-        this.todos.push(createTodoDTO);
-        return this.todos.at(-1);
+        // Update entity properties
+        todo.title = updateTodoDto.title;
+        todo.description = updateTodoDto.description;
+        todo.status = updateTodoDto.status;
+
+        // Save updated entity to the database
+        return await this.todoRepository.save(todo);
     }
 
-    // Deletes a todo from the array
-    async deleteTodo(todoID: number): Promise<any> {
-        if (! await this.existedTodo(todoID)){
-            return null;
+    async delete(id: number): Promise<Todo> {
+        const todo = await this.findOne(id);
+        
+        if (!todo) {
+            throw new NotFoundException('Todo not found');
         }
-        const todoIndex = this.todos.findIndex((todo) => todo.id === todoID);
-        return this.todos.splice(todoIndex, 1);
-    }
+        
+        await this.todoRepository.remove(todo)
+        return todo
+    } 
 }
 
