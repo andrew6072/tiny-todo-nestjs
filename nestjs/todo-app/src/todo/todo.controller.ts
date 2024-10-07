@@ -24,6 +24,9 @@ export class TodoController {
     constructor(private readonly todoService: TodoService) {}
 
     @Post('/')
+    // 1) create middleware for multiple used components like @Res()
+    // 2) instead of getTodo() use get()
+    // 
     async create(@Res() res, @Body() createTodoDTO: CreateTodoDTO) {
         const newTodo = await this.todoService.create(createTodoDTO);
         if (!newTodo) {
