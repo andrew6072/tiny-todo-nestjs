@@ -1,0 +1,45 @@
+Register
+curl -X POST http://localhost:3000/auth/register -d '{"username": "ducanh", "password": "mypass", "email": "andrew@some.com"}' -H "Content-Type: application/json" -w "\n"
+
+
+Login
+curl -X POST http://localhost:3000/auth/login -d '{"username": "ducanh", "password": "mypass"}' -H "Content-Type: application/json" -w "\n"
+
+
+Profile
+curl http://localhost:3000/auth/profile -w "\n"
+curl http://localhost:3000/auth/profile -H "Authorization: Bearer token" -w "\n"
+
+
+/users/
+GetAll
+curl -X GET http://localhost:3000/users/ -w "\n"
+curl -X GET http://localhost:3000/users/ -H "Authorization: Bearer token" -w "\n"
+
+GetOne
+curl -X GET http://localhost:3000/users/john -w "\n"
+curl -X GET http://localhost:3000/users/john -H "Authorization: Bearer token" -w "\n"
+
+
+/todos/
+GetAll
+curl -X GET http://localhost:3000/todos/ -w "\n"
+curl -X GET http://localhost:3000/todos/ -H "Authorization: Bearer token" -w "\n"
+
+GetOne
+curl -X GET http://localhost:3000/todos/1 -w "\n"
+curl -X GET http://localhost:3000/todos/1 -H "Authorization: Bearer token" -w "\n"
+
+Create
+curl -X POST http://localhost:3000/todos/ -d '{"userId": 3, "title":"test", "description":"test", "status":"in-progress"}' -w "\n"
+curl -X POST http://localhost:3000/todos/ -d '{"userId": 3, "title":"test", "description":"description", "status":"in-progress"}' -w "\n" -H "Authorization: Bearer token"
+
+Update
+curl -X POST http://localhost:3000/todos/1 -d '{}' -w "\n"
+curl -X POST http://localhost:3000/todos/1 -H "Authorization: Bearer token" -d '{}' -w "\n"
+
+Delete
+curl -X DELETE http://localhost:3000/users/:1 -w "\n"
+curl -X DELETE http://localhost:3000/users/:1 -H "Authorization: Bearer token" -w "\n"
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiYW5kcmV3IiwiaWF0IjoxNzI4MjE2NzMyLCJleHAiOjE3MjgyMTczMzJ9.PD1lL8i5Y1N4jbuIeAaTgYhLYTTwSFchnNDE7MNPANc
