@@ -29,12 +29,10 @@ export class TodoController {
     // 
     async create(@Res() res, @Body() createTodoDTO: CreateTodoDTO) {
         const newTodo = await this.todoService.create(createTodoDTO);
-        if (!newTodo) {
-            throw new ConflictException('Todo with the same id already exists.')
-        }
         return res.status(HttpStatus.OK).json({
-            message: 'Todo has been submitted successfully!',
+            message: 'TodoController.create: Successfull!',
             data: newTodo,
+            statusCode: HttpStatus.OK,
         });
     }
 
@@ -42,13 +40,21 @@ export class TodoController {
     @Get('/')
     async getAll(@Res() res) {
         const data = await this.todoService.findAll();
-        return res.status(HttpStatus.OK).json(data);
+        return res.status(HttpStatus.OK).json({
+            message: "TodoController.getAll: Successfull!",
+            data: data,
+            statusCode: HttpStatus.OK,
+        });
     }
 
     @Get('/:id')
     async getOne(@Res() res, @Param('id') id) {
         const data = await this.todoService.findOne(id);
-        return res.status(HttpStatus.OK).json(data);
+        return res.status(HttpStatus.OK).json({
+            message: "TodoController.getOne: Successfull!",
+            data: data,
+            statusCode: HttpStatus.OK,
+        });
     }
 
     @Put('/')
@@ -58,12 +64,10 @@ export class TodoController {
         @Body() updateTodoDTO: UpdateTodoDTO,
     ) {
         const editedTodo = await this.todoService.update(parseInt(id), updateTodoDTO);
-        if (!editedTodo) {
-            throw new NotFoundException('Todo does not exist!');
-        }
         return res.status(HttpStatus.OK).json({
-            message: 'Todo has been successfully updated',
+            message: 'TodoController.update: Todo has been successfully updated!',
             data: editedTodo,
+            statusCode: HttpStatus.OK,
         });
     }
 
@@ -71,13 +75,10 @@ export class TodoController {
     @Delete('/')
     async delete(@Res() res, @Query('id') id) {
         const deletedTodo = await this.todoService.delete(parseInt(id));
-        
-        if (!deletedTodo) {
-            throw new NotFoundException('Todo does not exist!');
-        }
         return res.status(HttpStatus.OK).json({
-            message: 'Todo has been deleted!',
+            message: 'TodoController.delete: Todo has been deleted!',
             data: deletedTodo,
+            statusCode: HttpStatus.OK,
         });
     }
 }

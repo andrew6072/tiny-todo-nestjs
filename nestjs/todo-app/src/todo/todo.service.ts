@@ -23,7 +23,7 @@ export class TodoService {
             where: { id }
         });
         if (!data) {
-            throw new NotFoundException('Data not found');
+            throw new NotFoundException('TodoService.findOne: Todo not found!');
         }
         return data;
     }
@@ -31,6 +31,14 @@ export class TodoService {
     async create(createTodoDto: CreateTodoDTO): Promise<Todo> {
         // ? Do we need to check if userId is present in DB O(n) ?
         // Or we can hanle this issue by only let existed user to create Todo
+
+        const id = createTodoDto.userId;
+        const foundUser = await this.todoRepository.findOne({ 
+            where: { id }
+        });
+        if (!foundUser) { 
+            throw new NotFoundException('TodoService.create: User not found!');
+        }
         const newTodo = this.todoRepository.create({
             title: createTodoDto.title,
             description: createTodoDto.description,
@@ -44,10 +52,10 @@ export class TodoService {
         const todo = await this.findOne(id);
 
         if (!todo) {
-            throw new NotFoundException('Todo not found');
+            throw new NotFoundException('TodoService.update: Todo not found!');
         }
         if (!statusSet.includes(updateTodoDto.status)) {
-            throw new ConflictException('Status not supported');
+            throw new ConflictException('TodoService.update: Status not supported!');
         }
         // Update entity properties
         todo.title = updateTodoDto.title;
@@ -62,7 +70,7 @@ export class TodoService {
         const todo = await this.findOne(id);
         
         if (!todo) {
-            throw new NotFoundException('Todo not found');
+            throw new NotFoundException('TodoService.delete: Todo not found!');
         }
         
         await this.todoRepository.remove(todo)
