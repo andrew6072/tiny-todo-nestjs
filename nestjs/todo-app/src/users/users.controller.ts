@@ -1,12 +1,15 @@
-import { Body, ConflictException, Controller, Get, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Query, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Roles } from 'src/roles/roles.decorator';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
 
     constructor(private readonly usersService: UsersService){}
 
+    @Roles(1,2)
     @Get('/:username')
     async getOne(@Res() res, @Param('username') username:string) {
         const data = await this.usersService.findOne(username);
@@ -26,6 +29,7 @@ export class UsersController {
         });
     }
 
+    @Roles(1,2)
     @Get('/')
     async getAll(@Res() res) {
         const data = await this.usersService.findAll();
@@ -36,12 +40,54 @@ export class UsersController {
         });
     }
 
+    @Roles(1,2)
     @Post('/')
     async create(@Res() res, @Body() createUserDto: CreateUserDto) {
         const newData = await this.usersService.create(createUserDto);
         return res.status(HttpStatus.OK).json({
             message: 'UserController.create: User has been registred successfully!',
             data: newData,
+            statusCode: HttpStatus.OK,
+        });
+    }
+
+    @Roles(1,2)
+    @Put()
+    async update(
+        @Res() res, 
+        @Query('id') id: number,
+        @Body() updateUserDto: UpdateUserDto,
+    ) {
+        const newData = await this.usersService.update(id, updateUserDto);
+        return res.status(HttpStatus.OK).json({
+            message: 'UserController.update: User has been updated successfully!',
+            data: newData,
+            statusCode: HttpStatus.OK,
+        });
+    }
+
+    @Roles(2)
+    @Put('role/:roleId')
+    async updateRole(
+        @Res() res, 
+        @Query('id') id: number,
+        @Param('roleId') roleId: number,
+    ) {
+        const newData = await this.usersService.updateRole(id, roleId);
+        return res.status(HttpStatus.OK).json({
+            message: 'UserController.updateRole: User role has been updated successfully!',
+            data: newData,
+            statusCode: HttpStatus.OK,
+        });
+    }
+
+    @Roles(1,2)
+    @Delete('/')
+    async delete(@Res() res, @Query('id') id: number) {
+        const deletedTodo = await this.usersService.delete(id);
+        return res.status(HttpStatus.OK).json({
+            message: 'UsersController.delete: User has been deleted!',
+            data: deletedTodo,
             statusCode: HttpStatus.OK,
         });
     }

@@ -16,6 +16,8 @@ import {
 import { TodoService } from './todo.service';
 import { CreateTodoDTO } from './dto/create-todo.dto';
 import { UpdateTodoDTO } from './dto/update-todo.dto';
+import { Role } from 'src/roles/role.entity';
+import { Roles } from 'src/roles/roles.decorator';
 
 
 @Controller('todos')
@@ -23,10 +25,11 @@ export class TodoController {
 
     constructor(private readonly todoService: TodoService) {}
 
-    @Post('/')
     // 1) create middleware for multiple used components like @Res()
     // 2) instead of getTodo() use get()
     // 
+    @Roles(1,2)
+    @Post('/')
     async create(@Res() res, @Body() createTodoDTO: CreateTodoDTO) {
         const newTodo = await this.todoService.create(createTodoDTO);
         return res.status(HttpStatus.OK).json({
@@ -37,6 +40,7 @@ export class TodoController {
     }
 
     // Fetch all todos
+    @Roles(2)
     @Get('/')
     async getAll(@Res() res) {
         const data = await this.todoService.findAll();
@@ -47,6 +51,7 @@ export class TodoController {
         });
     }
 
+    @Roles(1,2)
     @Get('/:id')
     async getOne(@Res() res, @Param('id') id) {
         const data = await this.todoService.findOne(id);
@@ -57,6 +62,7 @@ export class TodoController {
         });
     }
 
+    @Roles(1,2)
     @Put('/')
     async update(
         @Res() res,
@@ -72,6 +78,7 @@ export class TodoController {
     }
 
     // Delete a todo using ID
+    @Roles(1,2)
     @Delete('/')
     async delete(@Res() res, @Query('id') id) {
         const deletedTodo = await this.todoService.delete(parseInt(id));

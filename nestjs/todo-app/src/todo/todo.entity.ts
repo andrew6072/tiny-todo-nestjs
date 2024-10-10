@@ -1,6 +1,6 @@
 // src/todos/todo.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../user/user.entity';
+import { User } from '../users/user.entity';
 
 @Entity('todos')
 export class Todo {
@@ -20,12 +20,14 @@ export class Todo {
   })
   status: 'pending' | 'in-progress' | 'completed';
 
-  @Column()
-  userId: number;
+  // Remove the explicit userId column as it's automatically handled by the relation
+  // @Column()
+  // userId: number; // Not needed
 
+  // Define the Many-to-One relationship with User
   @ManyToOne(() => User, (user) => user.todos, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' }) // Define the join column
-  user: User; // Define the relationship with the User entity
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' }) // The foreign key will still be "userId" in the database
+  user: User; // This will reference the whole User entity
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
@@ -33,4 +35,3 @@ export class Todo {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 }
-

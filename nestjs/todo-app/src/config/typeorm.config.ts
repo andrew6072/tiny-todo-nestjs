@@ -1,8 +1,9 @@
 // src/config/typeorm.config.ts
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { User } from '../user/user.entity';
+import { User } from '../users/user.entity';
 import { Todo } from '../todo/todo.entity';
 import * as dotenv from 'dotenv'
+import { Role } from 'src/roles/role.entity';
 dotenv.config();
 
 
@@ -14,6 +15,6 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE,
-  entities: [User, Todo],  // Register entities
+  entities: [User, Todo, Role],  // Register entities
   synchronize: true,       // Auto synchronize schema with database (disable in production),
 };

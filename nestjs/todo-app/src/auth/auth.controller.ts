@@ -4,6 +4,7 @@ import { SignInDto } from './dto/signin.dto';
 import { sign } from 'crypto';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './constants';
+import { Roles } from 'src/roles/roles.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -32,6 +33,8 @@ export class AuthController {
         });
     }
 
+
+    @Roles(2)
     @Get('profile')
     getProfile(@Res() res, @Req() req) {
         console.log(req.user);

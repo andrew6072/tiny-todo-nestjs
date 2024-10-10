@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { Todo } from './todo.entity';
 import { UpdateTodoDTO } from './dto/update-todo.dto';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class TodoService {
@@ -11,16 +12,21 @@ export class TodoService {
     constructor(
         @InjectRepository(Todo)
         private readonly todoRepository: Repository<Todo>,
+        @InjectRepository(User)
+        private readonly usersRepository: Repository<User>,
     ) {}
     
     async findAll(): Promise<Todo[]> {
-        const data = await this.todoRepository.find();
+        const data = await this.todoRepository.find(
+           {relations: ['user'],}
+        );
         return data;
     }
 
     async findOne(id: number): Promise<Todo> {
         const data = await this.todoRepository.findOne({ 
-            where: { id }
+            relations: ['user'],
+            where: { id },
         });
         if (!data) {
             throw new NotFoundException('TodoService.findOne: Todo not found!');
@@ -29,23 +35,29 @@ export class TodoService {
     }
 
     async create(createTodoDto: CreateTodoDTO): Promise<Todo> {
-        // ? Do we need to check if userId is present in DB O(n) ?
-        // Or we can hanle this issue by only let existed user to create Todo
-
-        const id = createTodoDto.userId;
-        const foundUser = await this.todoRepository.findOne({ 
-            where: { id }
+        const userId = createTodoDto.userId;
+    
+        // Find the user by ID
+        const foundUser = await this.usersRepository.findOne({ 
+            where: { id: userId },  // Use the userRepository to fetch the user,
+            relations: ['role'],
         });
+    
         if (!foundUser) { 
             throw new NotFoundException('TodoService.create: User not found!');
         }
+    
+        // Create a new Todo and set the user object directly
         const newTodo = this.todoRepository.create({
             title: createTodoDto.title,
             description: createTodoDto.description,
-            userId: createTodoDto.userId,  // Assuming you pass the userId from the request
+            user: foundUser  // Set the user object as the foreign key relationship
         });
+    
+        // Save the new Todo
         return await this.todoRepository.save(newTodo);
     }
+    
 
     async update(id: number, updateTodoDto: UpdateTodoDTO): Promise<Todo> {
         const statusSet = ['pending', 'in-progress', 'completed'];
