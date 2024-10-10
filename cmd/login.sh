@@ -1,6 +1,8 @@
+username="admin1"
+
 response=$(
     curl -X POST http://localhost:3000/auth/login \
-        -d '{"username": "ducanh", "password": "mypass"}' \
+        -d "{\"username\": \"$username\", \"password\": \"mypass\"}" \
         -H "Content-Type: application/json" \
         -w "\n"
 )

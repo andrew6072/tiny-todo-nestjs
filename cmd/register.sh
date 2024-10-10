@@ -1,6 +1,8 @@
+username="johnny"
+
 response=$(
     curl -X POST http://localhost:3000/auth/register \
-        -d '{"username": "andrew", "password": "mypass", "email": "1234@some.com"}' \
+        -d "{\"username\": \"$username\", \"password\": \"mypass\", \"email\": \"$username@mail1.com\", \"role\":\"admin\"}" \
         -H "Content-Type: application/json" \
         -w "\n"
 )

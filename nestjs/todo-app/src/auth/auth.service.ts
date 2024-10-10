@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from 'src/user/users.service';
+import { UsersService } from 'src/users/users.service';
 import { SignInDto } from './dto/signin.dto';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
@@ -18,12 +18,14 @@ export class AuthService {
         const pass = signInDto.password;
 
         const user = await this.usersService.findOne(username);
+        console.log(user);
         if (!user || !(await bcrypt.compare(pass, user.password))) {
             throw new UnauthorizedException("AuthService.signIn: Invalid username or password");
         }
         const payload = {
             sub: user.id,
-            username: user.username
+            username: user.username,
+            role: user.role // add role here for authorization
         };
         // generate JWT from a subset of the user object properties (user.id, user.username)
         return {access_token: await this.jwtService.signAsync(payload)};

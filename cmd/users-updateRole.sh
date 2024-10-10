@@ -1,6 +1,7 @@
 br="======================================================================================"
 bl=""
-todo_id=10
+user_id=5
+to_role_id=1
 
 echo $br
 access_token=$(cat /home/andrew6072/cmpt688/todo-app-js/cmd/access_token.txt)
@@ -19,7 +20,7 @@ else
     echo "Response:"
     echo $bl
 
-    curl -X GET http://localhost:3000/todos/$todo_id \
+    curl -X PUT http://localhost:3000/users/role/$to_role_id?id=$user_id \
         -H "Authorization: Bearer $access_token" \
         -w "\n"
 

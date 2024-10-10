@@ -1,6 +1,7 @@
 // src/users/user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Todo } from '../todo/todo.entity';  // Import the Todo entity to establish the relation
+import { Role } from 'src/roles/role.entity';
 
 @Entity('users')  // The name of the table in the database
 export class User {
@@ -22,7 +23,11 @@ export class User {
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
-  // One-to-Many relationship with the Todo entity
-  @OneToMany(() => Todo, (todo) => todo.userId, { cascade: true })
+  // Correctly define One-to-Many relationship with Todo entity
+  @OneToMany(() => Todo, (todo) => todo.user, { cascade: true })  // Reference 'user' not 'userId'
   todos: Todo[];
+
+  @ManyToOne(() => Role, role => role.users)
+  @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
+  role: Role;
 }
