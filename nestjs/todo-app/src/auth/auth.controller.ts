@@ -34,10 +34,9 @@ export class AuthController {
     }
 
 
-    @Roles(2)
+    @Roles(1,2)
     @Get('profile')
     getProfile(@Res() res, @Req() req) {
-        console.log(req.user);
         return res.status(HttpStatus.OK).json({
             message: 'AuthController.profile: Successfull!', 
             data: req.user,

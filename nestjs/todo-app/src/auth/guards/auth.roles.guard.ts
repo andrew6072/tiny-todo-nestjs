@@ -8,6 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { User } from '../../users/user.entity';
 import { ROLES_KEY } from 'src/roles/roles.decorator';
+import { UserPayload } from '../dto/auth-jwt-payload.dto';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -23,7 +24,7 @@ export class RolesGuard implements CanActivate {
     
         // Get the request and user
         const request = context.switchToHttp().getRequest();
-        const user: User = request.user; // the user is set by an authentication guard in the request
+        const user: UserPayload = request.user; // the user is set by an authentication guard in the request
         //console.log(user);
         if (!user || !user.role) {
             throw new ForbiddenException('RolesGuard: User role is missing.');

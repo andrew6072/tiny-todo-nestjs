@@ -1,10 +1,11 @@
-import { ConflictException, Injectable, NotFoundException, Res } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, Res, UnauthorizedException } from '@nestjs/common';
 import { CreateTodoDTO } from './dto/create-todo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { Todo } from './todo.entity';
 import { UpdateTodoDTO } from './dto/update-todo.dto';
 import { User } from 'src/users/user.entity';
+import { UserPayload } from 'src/auth/dto/auth-jwt-payload.dto';
 
 @Injectable()
 export class TodoService {
@@ -16,28 +17,50 @@ export class TodoService {
         private readonly usersRepository: Repository<User>,
     ) {}
     
-    async findAll(): Promise<Todo[]> {
+    async findAll(userPayload: UserPayload): Promise<Todo[]> {
+        if (!userPayload) {
+            throw new UnauthorizedException("TodoService.findAll: Unauthorized!");
+        }
+
         const data = await this.todoRepository.find(
-           {relations: ['user'],}
+            {
+                where: {
+                    user : {
+                        id: userPayload.sub,
+                    }
+                },
+                relations: [/*'user'*/],
+            }
         );
         return data;
     }
 
-    async findOne(id: number): Promise<Todo> {
+    async findOne(userPayload: UserPayload, todo_id: number): Promise<Todo> {
+        if (!userPayload) {
+            throw new UnauthorizedException("TodoService.findAll: Unauthorized!");
+        }
+
         const data = await this.todoRepository.findOne({ 
             relations: ['user'],
-            where: { id },
+            where: { id: todo_id },
         });
         if (!data) {
             throw new NotFoundException('TodoService.findOne: Todo not found!');
         }
+        if (data.user.id != userPayload.sub) {
+            throw new UnauthorizedException('TodoService.findOne: Unauthorized!');
+        }
         return data;
     }
 
-    async create(createTodoDto: CreateTodoDTO): Promise<Todo> {
-        const userId = createTodoDto.userId;
+    async create(userPayload: UserPayload, createTodoDto: CreateTodoDTO): Promise<Todo> {
+        if (!userPayload) {
+            throw new UnauthorizedException("TodoService.create: Unauthorized!");
+        }
+        const userId = userPayload.sub;
     
         // Find the user by ID
+        // TODO: Possible optimize, we can use userPayload instead of finding user one more time
         const foundUser = await this.usersRepository.findOne({ 
             where: { id: userId },  // Use the userRepository to fetch the user,
             relations: ['role'],
@@ -59,9 +82,13 @@ export class TodoService {
     }
     
 
-    async update(id: number, updateTodoDto: UpdateTodoDTO): Promise<Todo> {
+    async update(userPayload: UserPayload, id: number, updateTodoDto: UpdateTodoDTO): Promise<Todo> {
+        if (!userPayload) {
+            throw new UnauthorizedException("TodoService.create: Unauthorized!");
+        }
+
         const statusSet = ['pending', 'in-progress', 'completed'];
-        const todo = await this.findOne(id);
+        const todo = await this.findOne(userPayload, id);
 
         if (!todo) {
             throw new NotFoundException('TodoService.update: Todo not found!');
@@ -78,8 +105,12 @@ export class TodoService {
         return await this.todoRepository.save(todo);
     }
 
-    async delete(id: number): Promise<Todo> {
-        const todo = await this.findOne(id);
+    async delete(userPayload:UserPayload, id: number): Promise<Todo> {
+        if (!userPayload) {
+            throw new UnauthorizedException("TodoService.create: Unauthorized!");
+        }
+
+        const todo = await this.findOne(userPayload, id);
         
         if (!todo) {
             throw new NotFoundException('TodoService.delete: Todo not found!');
