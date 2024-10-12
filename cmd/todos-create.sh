@@ -1,8 +1,12 @@
 br="======================================================================================"
 bl=""
-userId=5
 echo $br
 access_token=$(cat /home/andrew6072/cmpt688/todo-app-js/cmd/access_token.txt)
+this_user=$(
+    curl http://localhost:3000/auth/profile \
+        -H "Authorization: Bearer $access_token" \
+        -w "\n" | jq -r '.data.username'
+)
 
 if [ -z "$access_token" ]; then
     echo $br
@@ -19,7 +23,7 @@ else
     echo $bl
 
     curl -X POST http://localhost:3000/todos/ \
-        -d "{\"userId\": $userId, \"title\": \"TEST\", \"description\": \"TEST\", \"status\":\"in-progress\"}" \
+        -d "{\"title\": \"TITLE OF $this_user\", \"description\": \"CONTENT OF $this_user\"}" \
         -H "Content-Type: application/json" \
         -w "\n" \
         -H "Authorization: Bearer $access_token"
