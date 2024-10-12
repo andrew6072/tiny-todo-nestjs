@@ -1,4 +1,4 @@
-username="johnny"
+username="user2"
 
 response=$(
     curl -X POST http://localhost:3000/auth/register \
