@@ -9,14 +9,11 @@ import { UsersService } from 'src/users/users.service';
 import { AuthGuard } from './guards/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/auth.roles.guard';
+import { jwtConfig } from 'src/config/jwt.config';
 
 @Module({
   imports: [
-    JwtModule.register({
-      global: true,
-      secret: jwtConstants.secret,
-      signOptions: {expiresIn: '600s'}
-    }),
+    JwtModule.register(jwtConfig),
     UsersModule
   ],
   controllers: [AuthController],

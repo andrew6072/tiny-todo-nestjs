@@ -18,7 +18,6 @@ export class AuthService {
         const pass = signInDto.password;
 
         const user = await this.usersService.findOne(username);
-        console.log(user);
         if (!user || !(await bcrypt.compare(pass, user.password))) {
             throw new UnauthorizedException("AuthService.signIn: Invalid username or password");
         }

@@ -12,12 +12,16 @@ import {
     Delete,
     Post,
     ConflictException,
+    ExecutionContext,
+    Req,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDTO } from './dto/create-todo.dto';
 import { UpdateTodoDTO } from './dto/update-todo.dto';
 import { Role } from 'src/roles/role.entity';
 import { Roles } from 'src/roles/roles.decorator';
+import { User } from 'src/users/user.entity';
+import { UserPayload } from 'src/auth/dto/auth-jwt-payload.dto';
 
 
 @Controller('todos')
@@ -30,8 +34,10 @@ export class TodoController {
     // 
     @Roles(1,2)
     @Post('/')
-    async create(@Res() res, @Body() createTodoDTO: CreateTodoDTO) {
-        const newTodo = await this.todoService.create(createTodoDTO);
+    async create(@Req() req, @Res() res, @Body() createTodoDTO: CreateTodoDTO) {
+        const userPayload: UserPayload = req.user;
+
+        const newTodo = await this.todoService.create(userPayload, createTodoDTO);
         return res.status(HttpStatus.OK).json({
             message: 'TodoController.create: Successfull!',
             data: newTodo,
@@ -40,10 +46,12 @@ export class TodoController {
     }
 
     // Fetch all todos
-    @Roles(2)
+    @Roles(1, 2)
     @Get('/')
-    async getAll(@Res() res) {
-        const data = await this.todoService.findAll();
+    async getAll(@Req() req, @Res() res) {
+        const userPayload: UserPayload = req.user;
+
+        const data = await this.todoService.findAll(userPayload);
         return res.status(HttpStatus.OK).json({
             message: "TodoController.getAll: Successfull!",
             data: data,
@@ -53,8 +61,9 @@ export class TodoController {
 
     @Roles(1,2)
     @Get('/:id')
-    async getOne(@Res() res, @Param('id') id) {
-        const data = await this.todoService.findOne(id);
+    async getOne(@Req() req, @Res() res, @Param('id') todo_id) {
+        const userPayload: UserPayload = req.user;
+        const data = await this.todoService.findOne(userPayload, todo_id);
         return res.status(HttpStatus.OK).json({
             message: "TodoController.getOne: Successfull!",
             data: data,
@@ -65,11 +74,13 @@ export class TodoController {
     @Roles(1,2)
     @Put('/')
     async update(
+        @Req() req,
         @Res() res,
-        @Query('id') id,
+        @Query('id') id: number,
         @Body() updateTodoDTO: UpdateTodoDTO,
     ) {
-        const editedTodo = await this.todoService.update(parseInt(id), updateTodoDTO);
+        const userPayload: UserPayload = req.user;
+        const editedTodo = await this.todoService.update(userPayload, id, updateTodoDTO);
         return res.status(HttpStatus.OK).json({
             message: 'TodoController.update: Todo has been successfully updated!',
             data: editedTodo,
@@ -80,8 +91,9 @@ export class TodoController {
     // Delete a todo using ID
     @Roles(1,2)
     @Delete('/')
-    async delete(@Res() res, @Query('id') id) {
-        const deletedTodo = await this.todoService.delete(parseInt(id));
+    async delete(@Req() req, @Res() res, @Query('id') id: number) {
+        const userPayload: UserPayload = req.user;
+        const deletedTodo = await this.todoService.delete(userPayload, id);
         return res.status(HttpStatus.OK).json({
             message: 'TodoController.delete: Todo has been deleted!',
             data: deletedTodo,
