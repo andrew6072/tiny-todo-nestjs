@@ -22,7 +22,7 @@ import { Role } from 'src/roles/role.entity';
 import { Roles } from 'src/roles/roles.decorator';
 import { User } from 'src/users/user.entity';
 import { UserPayload } from 'src/auth/dto/auth-jwt-payload.dto';
-
+import { GetAllTodoDto } from './dto/getall-todo.dto';
 
 @Controller('todos')
 export class TodoController {
@@ -46,15 +46,27 @@ export class TodoController {
     }
 
     // Fetch all todos
+    
     @Roles(1, 2)
     @Get('/')
-    async getAll(@Req() req, @Res() res) {
+    async getAll(
+        @Req() req, 
+        @Res() res,
+        @Body() getAllTodoDto: GetAllTodoDto, 
+    ) {
+        // console.log("From TodoController.getAll: ", getAllTodoDto);
         const userPayload: UserPayload = req.user;
 
-        const data = await this.todoService.findAll(userPayload);
+        const pagination = await this.todoService.findAll(userPayload, getAllTodoDto);
         return res.status(HttpStatus.OK).json({
             message: "TodoController.getAll: Successfull!",
-            data: data,
+            data: pagination.products,
+            pagination: {
+                'page': pagination.page,
+                'per_page': pagination.per_page,
+                'total_pages': pagination.total_pages,
+                'total_products': pagination.total_products,
+            },
             statusCode: HttpStatus.OK,
         });
     }

@@ -18,9 +18,26 @@ else
     echo "Response:"
     echo $bl
 
-    curl -X GET http://localhost:3000/todos/ \
-        -H "Authorization: Bearer $access_token" \
-        -w "\n"
+    curl -X GET http://localhost:3000/todos \
+    -H "Authorization: Bearer $access_token" \
+    -H "Content-Type: application/json" \
+    -d '{
+        "page": 3,
+        "per_page": 3,
+        "sort_by": "created_at",
+        "sort_order": "ASC",
+        "status": "",
+        "time": ["2024-10-10", "2024-10-14"]
+    }'
+    
+    # curl -X GET http://localhost:3000/todos \
+    #     -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+    #     -H "Content-Type: application/json" \
+    #     -d '{
+    #         "page": 1,
+    #         "per_page": 10
+    #     }'
+
 
     echo $bl
     echo $br

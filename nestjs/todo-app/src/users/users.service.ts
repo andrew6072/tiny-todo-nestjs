@@ -64,9 +64,10 @@ export class UsersService {
             email: createUserDto.email,
             password: createUserDto.password,
         });
-        if (!newUser.roles) {
-            const defaultRole = await this.rolesRepository.findOne({ where: { name: 'user' } });
-            newUser.roles.push(defaultRole);
+
+        const defaultRole = await this.rolesRepository.findOne({ where: { name: 'user' } });
+        if (defaultRole) {
+            newUser.roles = [defaultRole];
         }
       
         await this.usersRepository.save(newUser);

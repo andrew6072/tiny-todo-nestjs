@@ -1,7 +1,7 @@
 br="======================================================================================"
 bl=""
-user_id=8
-to_role_ids='[1,2,3]'
+user_id=11
+to_role_ids='[1,3]'
 
 echo $br
 access_token=$(cat /home/andrew6072/cmpt688/todo-app-js/cmd/access_token.txt)
@@ -21,6 +21,7 @@ else
     echo $bl
 
     curl -X POST "http://localhost:3000/users/$user_id/assign-roles" \
+        -H "Authorization: Bearer $access_token" \
         -H 'Content-Type: application/json' \
         -d "{\"roleIds\": $to_role_ids}"
 
