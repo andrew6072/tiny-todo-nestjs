@@ -30,6 +30,9 @@ export class TodoService {
                     }
                 },
                 relations: [/*'user'*/],
+                order: {
+                    created_at: 'DESC',
+                },
             }
         );
         return data;

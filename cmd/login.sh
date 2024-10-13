@@ -1,4 +1,4 @@
-username="user1"
+username="admin1"
 
 response=$(
     curl -X POST http://localhost:3000/auth/login \
