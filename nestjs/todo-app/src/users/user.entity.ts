@@ -1,5 +1,5 @@
 // src/users/user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, JoinTable, ManyToMany } from 'typeorm';
 import { Todo } from '../todo/todo.entity';  // Import the Todo entity to establish the relation
 import { Role } from 'src/roles/role.entity';
 
@@ -27,7 +27,17 @@ export class User {
   @OneToMany(() => Todo, (todo) => todo.user, { cascade: true })  // Reference 'user' not 'userId'
   todos: Todo[];
 
-  @ManyToOne(() => Role, role => role.users)
-  @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
-  role: Role;
+  @ManyToMany(() => Role, role => role.users)
+  @JoinTable({
+    name: 'user_roles',
+    joinColumn: {
+      name: 'userId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'roleId',
+      referencedColumnName: 'id',
+    }, 
+  })
+  roles: Role[];
 }

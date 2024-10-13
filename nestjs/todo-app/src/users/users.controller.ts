@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Put, Query, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Roles } from 'src/roles/roles.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './user.entity';
+import { Public } from 'src/auth/constants';
 
 @Controller('users')
 export class UsersController {
@@ -67,16 +69,16 @@ export class UsersController {
     }
 
     @Roles(2)
-    @Put('role/:roleId')
-    async updateRole(
+    @Post(':id/assign-roles')
+    async assignRoles(
         @Res() res, 
-        @Query('id') id: number,
-        @Param('roleId') roleId: number,
+        @Param('id', ParseIntPipe) userId: number,
+        @Body('roleIds') roleIds: number[]
     ) {
-        const newData = await this.usersService.updateRole(id, roleId);
+        const data = await this.usersService.assignRoles(userId, roleIds);
         return res.status(HttpStatus.OK).json({
-            message: 'UserController.updateRole: User role has been updated successfully!',
-            data: newData,
+            message: 'UsersController.assignTodo: Successfull!',
+            data: data,
             statusCode: HttpStatus.OK,
         });
     }

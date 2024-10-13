@@ -20,7 +20,12 @@ export class UsersService {
 
     async findAll(): Promise<User[]> {
         const users = await this.usersRepository.find(
-            {relations: ['role'],}
+            {
+                relations: ['roles'],
+                order: {
+                    created_at: 'DESC',
+                },
+            }
         );
         return users;
     }
@@ -29,11 +34,15 @@ export class UsersService {
         if (!username) {
             return null;
         }
-        const data = await this.usersRepository.findOne({ 
+        const user = await this.usersRepository.findOne({ 
             where: { username },
-            relations: ['role'],
+            relations: ['roles'],
         });
-        return data;
+
+        // console.log("From UserService.findOne:", user);
+        // console.log("From UserService.findOne:", username);
+
+        return user;
     }
 
     async create(createUserDto: CreateUserDto): Promise<User> {
@@ -55,9 +64,9 @@ export class UsersService {
             email: createUserDto.email,
             password: createUserDto.password,
         });
-        if (!newUser.role) {
+        if (!newUser.roles) {
             const defaultRole = await this.rolesRepository.findOne({ where: { name: 'user' } });
-            newUser.role = defaultRole;
+            newUser.roles.push(defaultRole);
         }
       
         await this.usersRepository.save(newUser);
@@ -69,7 +78,7 @@ export class UsersService {
     
         const user = await this.usersRepository.findOne({
             where: { id: id },
-            relations: ['role'],
+            relations: ['roles'],
         });
     
         if (!user) {
@@ -117,7 +126,7 @@ export class UsersService {
         // Find the user by ID
         const user = await this.usersRepository.findOne({
           where: { id: userId },
-          relations: ['role'],
+          relations: ['roles'],
         });
     
         if (!user) {
@@ -133,12 +142,33 @@ export class UsersService {
           throw new NotFoundException(`UsersSerive.updateRole: Role with ID ${roleId} not found.`);
         }
     
-        // Assign the new role to the user
-        user.role = role;
+        // TODO: Assign the new role to the user
+        //user.roles.push(role);
     
         // Save the updated user entity
         return await this.usersRepository.save(user);
     }
+
+    async assignRoles(userId: number, roleIds: number[]): Promise<User> {
+        const user = await this.usersRepository.findOne({
+          where: { id: userId },
+          relations: ['roles'],
+        });
+        if (!user) {
+            throw new NotFoundException(`UsersService.assignRoles: User with ID ${userId} not found.`);
+        }
+
+        const roles = await this.rolesRepository.findByIds(roleIds);
+        if (roles.length !== roleIds.length) {
+            const foundRoleIds = roles.map(role => role.id);
+            const missingRoleIds = roleIds.filter(id => !foundRoleIds.includes(id));
+            throw new NotFoundException(`UsersService.assignRoles: Roles with IDs ${missingRoleIds.join(', ')} not found.`);
+        }
+    
+        user.roles = roles;
+        return this.usersRepository.save(user);
+    }
+    
     
     async delete(id: number): Promise<void> {
         const user = await this.usersRepository.findOne({
