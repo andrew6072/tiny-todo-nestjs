@@ -23,7 +23,11 @@ else
     echo $bl
 
     curl -X POST http://localhost:3000/todos/ \
-        -d "{\"title\": \"TITLE OF $this_user\", \"description\": \"CONTENT OF $this_user\"}" \
+        -d "{
+            \"title\": \"ABCD $this_user\", 
+            \"description\": \"ABCD $this_user\",
+            \"status\": \"in-progress\"
+        }" \
         -H "Content-Type: application/json" \
         -w "\n" \
         -H "Authorization: Bearer $access_token"

@@ -11,7 +11,7 @@ export class UsersController {
 
     constructor(private readonly usersService: UsersService){}
 
-    @Roles(1,2)
+    @Roles(2)
     @Get('/:username')
     async getOne(@Res() res, @Param('username') username:string) {
         const data = await this.usersService.findOne(username);
@@ -31,7 +31,7 @@ export class UsersController {
         });
     }
 
-    @Roles(1,2)
+    @Roles(2)
     @Get('/')
     async getAll(@Res() res) {
         const data = await this.usersService.findAll();
@@ -42,7 +42,7 @@ export class UsersController {
         });
     }
 
-    @Roles(1,2)
+    @Roles(2)
     @Post('/')
     async create(@Res() res, @Body() createUserDto: CreateUserDto) {
         const newData = await this.usersService.create(createUserDto);
@@ -53,7 +53,7 @@ export class UsersController {
         });
     }
 
-    @Roles(1,2)
+    @Roles(2)
     @Put()
     async update(
         @Res() res, 
@@ -83,7 +83,7 @@ export class UsersController {
         });
     }
 
-    @Roles(1,2)
+    @Roles(2)
     @Delete('/')
     async delete(@Res() res, @Query('id') id: number) {
         const deletedTodo = await this.usersService.delete(id);
